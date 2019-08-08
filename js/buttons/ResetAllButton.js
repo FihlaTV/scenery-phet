@@ -20,11 +20,16 @@ define( function( require ) {
   var ResetButton = require( 'SCENERY_PHET/buttons/ResetButton' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   var SceneryPhetA11yStrings = require( 'SCENERY_PHET/SceneryPhetA11yStrings' );
+  var SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
+  var soundManager = require( 'TAMBO/soundManager' );
   var Tandem = require( 'TANDEM/Tandem' );
   var utteranceQueue = require( 'SCENERY_PHET/accessibility/utteranceQueue' );
 
   // constants
   var RESET_ALL_BUTTON_RADIUS = 20.8;
+
+  // sounds
+  var resetAllSound = require( 'sound!TAMBO/reset-all.mp3' );
 
   // a11y strings - not translatable
   var resetAllButtonNameString = SceneryPhetA11yStrings.resetAllLabelString.value;
@@ -46,6 +51,9 @@ define( function( require ) {
       tandem: Tandem.required,
 
       phetioDocumentation: 'The orange, round button that can be used to restore the initial state',
+
+      // sound, supply an alternative if desired or set to null for no sound
+      soundInfo: resetAllSound,
 
       // a11y
       innerContent: resetAllButtonNameString
@@ -86,9 +94,7 @@ define( function( require ) {
      * @public
      */
     dispose: function() {
-
       this.isFiringProperty.dispose();
-
       ResetButton.prototype.dispose.call( this );
     }
   } );
