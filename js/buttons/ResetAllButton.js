@@ -69,8 +69,8 @@ define( function( require ) {
       phetioState: false // this is a transient property based on user interaction, should not be stored in the state
     } );
 
-    // sound generation
-    let resetAllSoundClip;
+    // sound generation - TODO: this is not finalized, see https://github.com/phetsims/tambo/issues/73
+    var resetAllSoundClip;
     if ( options.soundInfo ) {
       resetAllSoundClip = new SoundClip( options.soundInfo, { initialOutputLevel: 0.7 } );
       soundManager.addSoundGenerator( resetAllSoundClip );
