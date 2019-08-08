@@ -27,6 +27,9 @@ define( require => {
   // constants
   const RESET_ALL_BUTTON_RADIUS = 20.8;
 
+  // sounds
+  var resetAllSound = require( 'sound!TAMBO/reset-all.mp3' );
+
   // a11y strings - not translatable
   const resetAllButtonNameString = SceneryPhetA11yStrings.resetAllLabelString.value;
   const resetAllAlertString = SceneryPhetA11yStrings.resetAllAlertString.value;
@@ -52,6 +55,9 @@ define( require => {
       // {{play:function}|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
       // sound production is desired
       soundPlayer: commonSoundPlayers.resetAll,
+
+      // sound, supply an alternative if desired or set to null for no sound
+      soundInfo: resetAllSound,
 
       // a11y
       innerContent: resetAllButtonNameString
@@ -97,9 +103,7 @@ define( require => {
      * @public
      */
     dispose: function() {
-
       this.isFiringProperty.dispose();
-
       ResetButton.prototype.dispose.call( this );
     }
   } );
