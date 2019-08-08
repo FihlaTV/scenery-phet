@@ -63,6 +63,20 @@ define( require => {
       phetioState: false // this is a transient property based on user interaction, should not be stored in the state
     } );
 
+    // sound generation
+    let resetAllSoundClip;
+    if ( options.soundInfo ) {
+      resetAllSoundClip = new SoundClip( options.soundInfo, { initialOutputLevel: 0.7 } );
+      soundManager.addSoundGenerator( resetAllSoundClip );
+
+      // play the sound when fired
+      isFiringProperty.lazyLink( function( isFiring ) {
+        if ( isFiring ) {
+          resetAllSoundClip.play();
+        }
+      } );
+    }
+
     // a11y - when reset all button is fired, disable alerts so that there isn't an excessive stream of alerts
     // while many Properties are reset. When callbacks are ended for reset all, enable alerts again and announce an
     // alert that everything was reset.
