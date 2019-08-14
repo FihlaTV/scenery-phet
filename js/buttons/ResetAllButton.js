@@ -78,9 +78,10 @@ define( function( require ) {
       phetioState: false // this is a transient property based on user interaction, should not be stored in the state
     } );
 
-    // sound generation - TODO: this is not finalized, see https://github.com/phetsims/tambo/issues/73
+    // sound generation - only loaded if sound is on (to conserve memory and load time)
+    // TODO: this is not finalized, see https://github.com/phetsims/tambo/issues/73
     var resetAllSoundClip = null;
-    if ( options.soundInfo !== null ) {
+    if ( phet.joist.sim.supportsSound && options.soundInfo !== null ) {
       if ( options.soundInfo === defaultResetAllSound ) {
         if ( !defaultSoundClipInfo.soundClip ) {
 
