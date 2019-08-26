@@ -52,9 +52,6 @@ define( function( require ) {
       // sound production is desired
       soundPlayer: commonSoundPlayers.resetAllSoundPlayer,
 
-      // options for sound generation
-      soundOptions: { initialOutputLevel: 0.7 },
-
       // a11y
       innerContent: resetAllButtonNameString
     }, options );
