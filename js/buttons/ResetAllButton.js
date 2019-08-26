@@ -53,8 +53,9 @@ define( require => {
       // sound production is desired
       soundPlayer: commonSoundPlayers.resetAll,
 
-      // sound, supply an alternative if desired or set to null for no sound
-      soundGenerationStrategy: resetAllSoundGenerationStrategy,
+      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
+      // sound production is desired
+      soundPlayer: commonSoundPlayers.resetAllSoundPlayer,
 
       // options for sound generation
       soundOptions: { initialOutputLevel: 0.7 },
@@ -109,25 +110,6 @@ define( require => {
       isFiringProperty.dispose();
     };
   }
-
-  /**
-   * strategy for playing reset all sound
-   */
-  var resetAllSoundGenerationStrategy = function( buttonModel, fireOnDown ) {
-
-    const resetAllSoundPlayer = commonSoundPlayers.resetAllSoundPlayer;
-
-    var playFiredSound = function() {
-      resetAllSoundPlayer.play();
-    };
-
-    buttonModel.firedEmitter.addListener( playFiredSound );
-
-    // dispose function
-    this.dispose = function() {
-      buttonModel.firedEmitter.removeListener( playFiredSound );
-    };
-  };
 
   sceneryPhet.register( 'ResetAllButton', ResetAllButton );
 
