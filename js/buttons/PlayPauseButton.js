@@ -102,6 +102,30 @@ define( require => {
     assert && phet.chipper.queryParameters.binder && InstanceRegistry.registerDataURL( 'scenery-phet', 'PlayPauseButton', this );
   }
 
+  /**
+   * inner type for playing sounds
+   * @constructor
+   */
+  function PlayPauseSoundPlayer( isPlayingProperty ) {
+
+    // @private
+    this.isPlayingProperty = isPlayingProperty;
+    this.playSoundPlayer = commonSoundPlayers.playButtonSoundPlayer;
+    this.pauseSoundPlayer = commonSoundPlayers.pauseButtonSoundPlayer;
+  }
+
+  inherit( Object, PlayPauseSoundPlayer, {
+
+    /**
+     * play the sound
+     * @public
+     */
+    play: function() {
+      this.isPlayingProperty.value ? this.pauseSoundPlayer.play() : this.playSoundPlayer.play();
+    }
+
+  } );
+
   sceneryPhet.register( 'PlayPauseButton', PlayPauseButton );
 
   return inherit( BooleanRoundToggleButton, PlayPauseButton, {

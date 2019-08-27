@@ -53,10 +53,6 @@ define( require => {
       // sound production is desired
       soundPlayer: commonSoundPlayers.resetAll,
 
-      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
-      // sound production is desired
-      soundPlayer: commonSoundPlayers.resetAllSoundPlayer,
-
       // a11y
       innerContent: resetAllButtonNameString
     }, options );
