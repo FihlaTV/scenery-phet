@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   var inherit = require( 'PHET_CORE/inherit' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   var StepButton = require( 'SCENERY_PHET/buttons/StepButton' );
@@ -20,7 +21,9 @@ define( function( require ) {
    */
   function StepForwardButton( options ) {
 
-    options = options || {};
+    options = _.extend( {
+      soundPlayer: commonSoundPlayers.stepForwardButtonSoundPlayer
+    }, options );
 
     assert && assert( !options.direction, 'StepForwardButton sets direction' );
     options.direction = 'forward';
