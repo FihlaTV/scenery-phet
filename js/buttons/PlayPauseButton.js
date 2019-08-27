@@ -12,6 +12,7 @@ define( function( require ) {
   // modules
   const BooleanRoundToggleButton = require( 'SUN/buttons/BooleanRoundToggleButton' );
   const Circle = require( 'SCENERY/nodes/Circle' );
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const inherit = require( 'PHET_CORE/inherit' );
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   const Path = require( 'SCENERY/nodes/Path' );
@@ -41,7 +42,8 @@ define( function( require ) {
       radius: DEFAULT_RADIUS,
       containerTagName: 'div',
       a11yPauseDescription: pauseDescriptionString,
-      a11yPlayDescription: playDescriptionString
+      a11yPlayDescription: playDescriptionString,
+      soundPlayer: new PlayPauseSoundPlayer( isPlayingProperty )
     }, options );
 
     this.isPlayingProperty = isPlayingProperty; // @private
@@ -82,6 +84,30 @@ define( function( require ) {
     // support for binder documentation, stripped out in builds and only runs when ?binder is specified
     assert && phet.chipper.queryParameters.binder && InstanceRegistry.registerDataURL( 'scenery-phet', 'PlayPauseButton', this );
   }
+
+  /**
+   * inner type for playing sounds
+   * @constructor
+   */
+  function PlayPauseSoundPlayer( isPlayingProperty ) {
+
+    // @private
+    this.isPlayingProperty = isPlayingProperty;
+    this.playSoundPlayer = commonSoundPlayers.playButtonSoundPlayer;
+    this.pauseSoundPlayer = commonSoundPlayers.pauseButtonSoundPlayer;
+  }
+
+  inherit( Object, PlayPauseSoundPlayer, {
+
+    /**
+     * play the sound
+     * @public
+     */
+    play: function() {
+      this.isPlayingProperty.value ? this.pauseSoundPlayer.play() : this.playSoundPlayer.play();
+    }
+
+  } );
 
   sceneryPhet.register( 'PlayPauseButton', PlayPauseButton );
 
