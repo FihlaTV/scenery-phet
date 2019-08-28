@@ -22,7 +22,7 @@ define( function( require ) {
   function StepForwardButton( options ) {
 
     options = _.extend( {
-      soundPlayer: commonSoundPlayers.stepForwardButtonSoundPlayer
+      soundPlayer: commonSoundPlayers.stepForwardButton
     }, options );
 
     assert && assert( !options.direction, 'StepForwardButton sets direction' );
