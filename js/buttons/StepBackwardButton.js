@@ -21,7 +21,7 @@ define( function( require ) {
   function StepBackwardButton( options ) {
 
     options = _.extend( {
-      soundPlayer: commonSoundPlayers.stepBackwardButtonSoundPlayer
+      soundPlayer: commonSoundPlayers.stepBackwardButton
     }, options );
 
     assert && assert( !options.direction, 'StepBackwardButton sets direction' );
