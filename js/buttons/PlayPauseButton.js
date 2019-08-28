@@ -93,8 +93,8 @@ define( require => {
 
     // @private
     this.isPlayingProperty = isPlayingProperty;
-    this.playSoundPlayer = commonSoundPlayers.playButtonSoundPlayer;
-    this.pauseSoundPlayer = commonSoundPlayers.pauseButtonSoundPlayer;
+    this.playSoundPlayer = commonSoundPlayers.playButton;
+    this.pauseSoundPlayer = commonSoundPlayers.pauseButton;
   }
 
   inherit( Object, PlayPauseSoundPlayer, {
