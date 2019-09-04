@@ -74,10 +74,15 @@ define( function( require ) {
     };
     isPlayingProperty.link( isPlayingListener );
 
+    // Load the sounds that will be played upon state changes.  This must be done during construction rather than
+    // getting the instance in the closure in order to avoid delays the first time the sound is used.
+    var playSound = commonSoundPlayers.playButton;
+    var pauseSound = commonSoundPlayers.pauseButton;
+
     // generate sounds when the state changes, but only if the state change is due to direct user interaction
     var playSounds = function( running ) {
       if ( self.buttonModel.overProperty.value ) {
-        running ? commonSoundPlayers.playButton.play() : commonSoundPlayers.pauseButton.play();
+        running ? playSound.play() : pauseSound.play();
       }
     };
     isPlayingProperty.lazyLink( playSounds );
