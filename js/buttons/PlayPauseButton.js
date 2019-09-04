@@ -43,7 +43,7 @@ define( require => {
       containerTagName: 'div',
       a11yPauseDescription: pauseDescriptionString,
       a11yPlayDescription: playDescriptionString,
-      soundPlayer: new PlayPauseSoundPlayer( isPlayingProperty )
+      soundPlayer: null // turn off default sound, since this type will do its own sound generation
     }, options );
 
     this.isPlayingProperty = isPlayingProperty; // @private
@@ -74,40 +74,27 @@ define( require => {
     };
     isPlayingProperty.link( isPlayingListener );
 
+    // generate sounds when the state changes, but only if the state change is due to direct user interaction
+    var playSounds = function( running ) {
+      if ( self.buttonModel.overProperty.value ) {
+        running ? commonSoundPlayers.playButton.play() : commonSoundPlayers.pauseButton.play();
+      }
+    };
+    isPlayingProperty.lazyLink( playSounds );
+
     // @private
     this.disposePlayPauseButton = function() {
       if ( isPlayingProperty.hasListener( isPlayingListener ) ) {
         isPlayingProperty.unlink( isPlayingListener );
+      }
+      if ( isPlayingProperty.hasListener( playSounds ) ) {
+        isPlayingProperty.unlink( playSounds );
       }
     };
 
     // support for binder documentation, stripped out in builds and only runs when ?binder is specified
     assert && phet.chipper.queryParameters.binder && InstanceRegistry.registerDataURL( 'scenery-phet', 'PlayPauseButton', this );
   }
-
-  /**
-   * inner type for playing sounds
-   * @constructor
-   */
-  function PlayPauseSoundPlayer( isPlayingProperty ) {
-
-    // @private
-    this.isPlayingProperty = isPlayingProperty;
-    this.playSoundPlayer = commonSoundPlayers.playButton;
-    this.pauseSoundPlayer = commonSoundPlayers.pauseButton;
-  }
-
-  inherit( Object, PlayPauseSoundPlayer, {
-
-    /**
-     * play the sound
-     * @public
-     */
-    play: function() {
-      this.isPlayingProperty.value ? this.pauseSoundPlayer.play() : this.playSoundPlayer.play();
-    }
-
-  } );
 
   sceneryPhet.register( 'PlayPauseButton', PlayPauseButton );
 
