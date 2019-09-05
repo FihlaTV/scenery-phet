@@ -48,7 +48,7 @@ define( function( require ) {
 
       phetioDocumentation: 'The orange, round button that can be used to restore the initial state',
 
-      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
+      // {{play:function}|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
       // sound production is desired
       soundPlayer: commonSoundPlayers.resetAll,
 
