@@ -76,6 +76,7 @@ define( require => {
 
     // Load the sounds that will be played upon state changes.  This must be done during construction rather than
     // getting the instance in the closure in order to avoid delays the first time the sound is used.
+    // TODO: move to options
     var playSound = commonSoundPlayers.playButton;
     var pauseSound = commonSoundPlayers.pauseButton;
 
