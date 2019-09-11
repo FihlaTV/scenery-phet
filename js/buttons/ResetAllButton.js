@@ -81,27 +81,6 @@ define( require => {
         utteranceQueue.addToBack( resetUtterance );
       }
     } );
-
-    // @private - dispose function
-    this.disposeResetAllButton = function() {
-      if ( resetAllSoundClip ) {
-
-        // if the default sound clip was in use, see if this was the last user and, if so, de-register it
-        if ( resetAllSoundClip === defaultSoundClipInfo.soundClip ) {
-          defaultSoundClipInfo.referenceCount--;
-          if ( defaultSoundClipInfo.referenceCount === 0 ) {
-            soundManager.removeSoundGenerator( resetAllSoundClip );
-            resetAllSoundClip.dispose();
-          }
-        }
-        else {
-          soundManager.removeSoundGenerator( resetAllSoundClip );
-          resetAllSoundClip.dispose();
-        }
-        soundManager.removeSoundGenerator( resetAllSoundClip );
-      }
-      isFiringProperty.dispose();
-    };
   }
 
   sceneryPhet.register( 'ResetAllButton', ResetAllButton );

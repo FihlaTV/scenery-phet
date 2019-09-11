@@ -43,7 +43,13 @@ define( require => {
       containerTagName: 'div',
       a11yPauseDescription: pauseDescriptionString,
       a11yPlayDescription: playDescriptionString,
-      soundPlayer: null // turn off default sound, since this type will do its own sound generation
+
+      // turn off default sound, since this type will do its own sound generation
+      soundPlayer: null,
+
+      // sounds to be played on play/pause transitions,
+      playSound: commonSoundPlayers.playButton,
+      pauseSound: commonSoundPlayers.pauseButton
     }, options );
 
     this.isPlayingProperty = isPlayingProperty; // @private
@@ -74,19 +80,17 @@ define( require => {
     };
     isPlayingProperty.link( isPlayingListener );
 
-    // Load the sounds that will be played upon state changes.  This must be done during construction rather than
-    // getting the instance in the closure in order to avoid delays the first time the sound is used.
-    // TODO: move to options
-    var playSound = commonSoundPlayers.playButton;
-    var pauseSound = commonSoundPlayers.pauseButton;
-
-    // generate sounds when the state changes, but only if the state change is due to direct user interaction
-    var playSounds = function( running ) {
-      if ( self.buttonModel.overProperty.value ) {
-        running ? playSound.play() : pauseSound.play();
+    // sound generation
+    var playSounds = function() {
+      const playing = isPlayingProperty.value;
+      if ( playing && options.playSound ) {
+        options.playSound.play();
+      }
+      else if ( !playing && options.pauseSound ) {
+        options.pauseSound.play();
       }
     };
-    isPlayingProperty.lazyLink( playSounds );
+    this.buttonModel.produceSoundEmitter.addListener( playSounds );
 
     // @private
     this.disposePlayPauseButton = function() {
@@ -96,6 +100,7 @@ define( require => {
       if ( isPlayingProperty.hasListener( playSounds ) ) {
         isPlayingProperty.unlink( playSounds );
       }
+      this.buttonModel.produceSoundEmitter.removeListener( playSounds );
     };
 
     // support for binder documentation, stripped out in builds and only runs when ?binder is specified
