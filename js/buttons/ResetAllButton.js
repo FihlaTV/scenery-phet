@@ -80,11 +80,6 @@ define( function( require ) {
         utteranceQueue.addToBack( resetUtterance );
       }
     } );
-
-    // @private - dispose function
-    this.disposeResetAllButton = function() {
-      isFiringProperty.dispose();
-    };
   }
 
   sceneryPhet.register( 'ResetAllButton', ResetAllButton );
