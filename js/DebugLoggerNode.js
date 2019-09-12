@@ -1,12 +1,15 @@
 // Copyright 2019, University of Colorado Boulder
 
 /**
- * DebugLoggerNode is a node that can be placed in the view and can show debug log messages.  This is most often used
- * when a console is not available, such as when debugging on iPads or other tablets.
+ * DebugLoggerNode is a node that can be added as a child to the view and can show debug log messages.  This is most
+ * often used when a console is not available, such as when debugging on iPads or other tablets.
  *
  * Typically, an instance of this is created and made global for use on a given screen.  Example:
  *   phet.debugLoggerNode = new DebugLogger;
  *   this.addChild( phet.debugLoggerNode );
+ *
+ * ...and then logging is accomplished by calling the logger like this:
+ *   phet.debugLoggerNode.log( 'my insightful message' );
  *
  * @author John Blanco (PhET Interactive Simulations)
  */
