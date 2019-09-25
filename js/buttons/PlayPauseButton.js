@@ -44,12 +44,10 @@ define( function( require ) {
       a11yPauseDescription: pauseDescriptionString,
       a11yPlayDescription: playDescriptionString,
 
-      // turn off default sound, since this type will do its own sound generation
-      soundPlayer: null,
-
       // sounds to be played on play/pause transitions,
-      playSound: commonSoundPlayers.playButton,
-      pauseSound: commonSoundPlayers.pauseButton
+      valueOnSound: commonSoundPlayers.playButton,
+      valueOffSound: commonSoundPlayers.pauseButton
+
     }, options );
 
     this.isPlayingProperty = isPlayingProperty; // @private
@@ -80,27 +78,11 @@ define( function( require ) {
     };
     isPlayingProperty.link( isPlayingListener );
 
-    // sound generation
-    var playSounds = function() {
-      const playing = isPlayingProperty.value;
-      if ( playing && options.playSound ) {
-        options.playSound.play();
-      }
-      else if ( !playing && options.pauseSound ) {
-        options.pauseSound.play();
-      }
-    };
-    this.buttonModel.produceSoundEmitter.addListener( playSounds );
-
     // @private
     this.disposePlayPauseButton = function() {
       if ( isPlayingProperty.hasListener( isPlayingListener ) ) {
         isPlayingProperty.unlink( isPlayingListener );
       }
-      if ( isPlayingProperty.hasListener( playSounds ) ) {
-        isPlayingProperty.unlink( playSounds );
-      }
-      this.buttonModel.produceSoundEmitter.removeListener( playSounds );
     };
 
     // support for binder documentation, stripped out in builds and only runs when ?binder is specified
