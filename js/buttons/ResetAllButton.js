@@ -18,6 +18,7 @@ define( require => {
   const DerivedPropertyIO = require( 'AXON/DerivedPropertyIO' );
   const inherit = require( 'PHET_CORE/inherit' );
   const PhetColorScheme = require( 'SCENERY_PHET/PhetColorScheme' );
+  const ResetAllButtonIO = require( 'SCENERY_PHET/buttons/ResetAllButtonIO' );
   const ResetButton = require( 'SCENERY_PHET/buttons/ResetButton' );
   const sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   const SceneryPhetA11yStrings = require( 'SCENERY_PHET/SceneryPhetA11yStrings' );
