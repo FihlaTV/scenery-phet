@@ -13,23 +13,25 @@
  *
  * @author John Blanco (PhET Interactive Simulations)
  */
-define( require => {
+define( function( require ) {
   'use strict';
 
   // modules
   const Color = require( 'SCENERY/util/Color' );
-  const RichText = require( 'SCENERY/nodes/RichText' );
+  const Node = require( 'SCENERY/nodes/Node' );
   const PhetFont = require( 'SCENERY_PHET/PhetFont' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
   const sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
+  const Text = require( 'SCENERY/nodes/Text' );
   const Vector2 = require( 'DOT/Vector2' );
 
   // constants
-  const DEFAULT_NUM_MESSAGES = 4;
+  const DEFAULT_NUM_LINES = 4;
   const DEFAULT_POSITION = new Vector2( 20, 20 );
   const DEFAULT_FONT = new PhetFont( 20 );
   const DEFAULT_TEXT_COLOR = Color.red;
 
-  class DebugLoggerNode extends RichText {
+  class DebugLoggerNode extends Node {
 
     /**
      * @param {Object} [options]
@@ -38,17 +40,29 @@ define( require => {
     constructor( options ) {
 
       options = _.extend( {
+
         left: DEFAULT_POSITION.x,
         top: DEFAULT_POSITION.y,
-        numMessagesToDisplay: DEFAULT_NUM_MESSAGES,
-        font: DEFAULT_FONT,
-        fill: DEFAULT_TEXT_COLOR
+        numLines: DEFAULT_NUM_LINES,
+        interLineSpacing: 5,
+
+        // options for the text
+        textOptions: {
+          fill: DEFAULT_TEXT_COLOR,
+          font: DEFAULT_FONT
+        },
+
+        // create this with a non-visible child so that positioning options can be used
+        children: [
+          new Rectangle( 0, 0, 1, 1, { fill: Color.TRANSPARENT } )
+        ]
       }, options );
 
-      super( '', options );
+      super( options );
 
-      this.numMessagesToDisplay = options.numMessagesToDisplay;
-      this.messages = [];
+      // @private
+      this.options = options;
+      this.textNodes = [];
     }
 
     /**
@@ -57,19 +71,37 @@ define( require => {
      */
     log( message ) {
 
-      if ( this.messages.length >= this.numMessagesToDisplay ) {
+      let messageTop = 0;
+      if ( this.textNodes.length < this.options.numLines ) {
 
-        // remove the oldest message
-        this.messages.shift();
+        // add this to the bottom of the existing set of lines
+        if ( this.textNodes.length > 0 ) {
+          messageTop = this.textNodes[ this.textNodes.length - 1 ].bottom;
+        }
       }
+      else {
 
-      // add the newest message
-      this.messages.push( message );
+        // delete the oldest line
+        const lineToRemove = this.textNodes.shift();
+        this.removeChild( lineToRemove );
 
-      // munge the messages together and set the value of the text
-      this.text = _.reduce( this.messages, ( memo, compositeMessage ) => {
-        return memo + '<br>' + compositeMessage;
+        // move all the other lines up one
+        this.textNodes[ 0 ].top = 0;
+        for ( let i = 1; i < this.textNodes.length; i++ ) {
+          this.textNodes[ i ].top = this.textNodes[ i - 1 ].bottom + this.options.interLineSpacing;
+        }
+
+        // set the top of the new node to be at the bottom of the last
+        messageTop = this.textNodes[ this.textNodes.length - 1 ].bottom + this.options.interLineSpacing;
+      }
+      const messageNode = new Text( message, {
+        font: this.options.textOptions.font,
+        fill: this.options.textOptions.fill,
+        left: 0,
+        top: messageTop
       } );
+      this.addChild( messageNode );
+      this.textNodes.push( messageNode );
     }
   }
 
