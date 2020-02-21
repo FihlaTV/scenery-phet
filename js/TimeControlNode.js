@@ -18,6 +18,8 @@ define( require => {
   const Node = require( 'SCENERY/nodes/Node' );
   const PhetFont = require( 'SCENERY_PHET/PhetFont' );
   const PlayPauseButton = require( 'SCENERY_PHET/buttons/PlayPauseButton' );
+  const Panel = require( 'SUN/Panel' );
+  const Enumeration = require( 'PHET_CORE/Enumeration' );
   const sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
   const SceneryPhetA11yStrings = require( 'SCENERY_PHET/SceneryPhetA11yStrings' );
   const StepForwardButton = require( 'SCENERY_PHET/buttons/StepForwardButton' );
@@ -30,11 +32,22 @@ define( require => {
   // strings
   const speedNormalString = require( 'string!SCENERY_PHET/speed.normal' );
   const speedSlowString = require( 'string!SCENERY_PHET/speed.slow' );
+  const speedFastString = require( 'string!SCENERY_PHET/speed.fast' );
 
   // PDOM strings
   const timeControlDescriptionString = SceneryPhetA11yStrings.timeControlDescription.value;
   const timeControlLabelString = SceneryPhetA11yStrings.timeControlLabel.value;
   const simSpeedsString = SceneryPhetA11yStrings.simSpeedsString.value;
+
+  // constants
+  // supported speeds for SpeedRadioButtonGroup
+  const TimeControlSpeeds = Enumeration.byKeys( [ 'FAST', 'NORMAL', 'SLOW' ] );
+  const DEFAULT_TIME_CONTROL_SPEEDS = [ TimeControlSpeeds.NORMAL, TimeControlSpeeds.SLOW ];
+
+  const SPEED_LABEL_MAP = new Map();
+  SPEED_LABEL_MAP.set( TimeControlSpeeds.FAST, { labelString: speedFastString, tandemName: 'fast' } );
+  SPEED_LABEL_MAP.set( TimeControlSpeeds.NORMAL, { labelString: speedNormalString, tandemName: 'normal' } );
+  SPEED_LABEL_MAP.set( TimeControlSpeeds.SLOW, { labelString: speedSlowString, tandemName: 'slow' } );
 
   class TimeControlNode extends Node {
 
@@ -46,36 +59,40 @@ define( require => {
 
       options = merge( {
 
-        // {BooleanProperty|null} if provided 'Normal' and 'Slow' radio buttons are added.
-        isSlowMotionProperty: null,
+        // {null|EnumerationProperty.<TimeControlSpeeds>} - Play speed Property for the
+        // radio button group. If null, no radio buttons included in this control.
+        timeControlSpeedProperty: null,
 
-        // {boolean} - if true a StepBackwardButton will be included in the controls to the left of the PlayPauseButton
-        includeStepBackwardButton: false,
+        // {TimeControlSpeeds[]} - Speeds supported by this TimeControlNode. Vertical radio buttons for
+        // each in the order provided.
+        timeControlSpeeds: DEFAULT_TIME_CONTROL_SPEEDS,
+
+        // {boolean} - If true, the SpeedRadioButtonGroup will be to the left of the PlayPauseStepButtons, if a
+        // SpeedRadioButtonGroup is included
+        speedRadioButtonGroupOnLeft: false,
+
+        // {number} - horizontal space between PlayPauseStepButtons and SpeedRadioButtonGroup, if
+        // SpeedRadioButtonGroup is included
+        buttonGroupXSpacing: 40,
 
         // {BooleanProperty}
         enabledProperty: null,
 
-        // Spacing options
-        playPauseStepXSpacing: 10, // horizontal space between Play/Pause and Step buttons
-        buttonsXSpacing: 40, // horizontal space between push buttons and radio buttons
+        // {Object|null} - options passed along to the PlayPauseStepButtons
+        playPauseStepButtonOptions: null,
 
-        // Options for the PlayPauseButton
-        playPauseOptions: null,
+        // {Object|null} - options passed along to the SpeedRadioButtonGroup, if included
+        speedRadioButtonGroupOptions: null,
 
-        // Options for the StepBackwardButton
-        stepBackwardOptions: null,
+        // {boolean} - if true, the SpeedRadioButtonGroup will be wrapped in a Panel
+        wrapSpeedRadioButtonGroupInPanel: false,
 
-        // Options for the StepForwardButton
-        stepForwardOptions: null,
-
-        // Options for the Normal/Slow text labels
-        labelOptions: null,
-
-        // Options for radio buttons
-        radioButtonOptions: null,
-
-        // Options for the radio button group
-        radioButtonGroupOptions: null,
+        // {Object|null} - options passed to the panel wrapping SpeedRadioButtonGroup, if SpeedRadioButtonGroup
+        // included AND we are wrapping them in a panel
+        speedRadioButtonGroupPanelOptions: {
+          xMargin: 8,
+          yMargin: 6
+        },
 
         // phet-io
         tandem: Tandem.REQUIRED, // {Tandem}
@@ -87,108 +104,27 @@ define( require => {
         descriptionContent: timeControlDescriptionString
       }, options );
 
-      if ( options.playPauseOptions ) {
-        assert && assert( !options.playPauseOptions.tandem, 'TimeControlNode sets tandems for buttons' );
+      // options validation
+      if ( options.timeControlSpeedProperty !== null ) {
+        assert && assert( options.timeControlSpeeds.length > 1, 'must be at least two speed options' );
+        assert && assert( _.every( options.timeControlSpeeds, speed => TimeControlSpeeds.includes( speed ) ), 'speeds must be one of TimeControlSpeeds' );
       }
 
-      if ( options.stepForwardOptions ) {
-        assert && assert( !options.stepForwardOptions.tandem, 'TimeControlNode sets tandems for buttons' );
-      }
+      const playPauseStepButtons = new PlayPauseStepButtons( isPlayingProperty, options.tandem.createTandem( 'playPauseStepButtons' ), options.playPauseStepButtonOptions );
+      const children = [ playPauseStepButtons ];
 
-      if ( options.stepBackwardOptions ) {
-        assert && assert( !options.stepBackwardOptions.tandem, 'TimeControlNode sets tandems for buttons' );
-      }
+      let speedRadioButtonGroup = null;
+      if ( options.timeControlSpeedProperty !== null ) {
+        speedRadioButtonGroup = new SpeedRadioButtonGroup( options.timeControlSpeedProperty, options.timeControlSpeeds, options.tandem.createTandem( 'speedRadioButtonGroup' ), options.radioButtonGroupOptions );
 
-      const playPauseButton = new PlayPauseButton( isPlayingProperty, merge( {
-        radius: 20,
-        touchAreaDilation: 5,
-        tandem: options.tandem.createTandem( 'playPauseButton' ),
-        phetioDocumentation: 'Button to control the animation in the simulation. This will also stop the model from stepping.'
-      }, options.playPauseOptions ) );
+        let child = speedRadioButtonGroup;
+        if ( options.wrapSpeedRadioButtonGroupInPanel ) {
+          child = new Panel( speedRadioButtonGroup, options.speedRadioButtonGroupPanelOptions );
+        }
+        options.speedRadioButtonGroupOnLeft ? children.unshift( child ) : children.push( child );
 
-      const stepButtonOptions = {
-        isPlayingProperty: isPlayingProperty,
-        radius: 15,
-        touchAreaDilation: 5
-      };
-
-      const stepForwardButton = new StepForwardButton( merge( {
-        tandem: options.tandem.createTandem( 'stepForwardButton' ),
-        phetioDocumentation: 'Progress the simulation a single model step forwards.'
-      }, stepButtonOptions, options.stepForwardOptions ) );
-
-      const buttons = [ playPauseButton, stepForwardButton ];
-
-      let stepBackwardButton = null;
-      if ( options.includeStepBackwardButton ) {
-        stepBackwardButton = new StepBackwardButton( merge( {
-          phetioDocumentation: 'Progress the simulation a single model step backwards.',
-          tandem: options.tandem.createTandem( 'stepBackwardButton' )
-        }, stepButtonOptions, options.stepBackwardOptions ) );
-        buttons.unshift( stepBackwardButton );
-      }
-
-      // Play/Pause and Step buttons
-      const pushButtonGroup = new HBox( {
-        spacing: options.playPauseStepXSpacing,
-        children: buttons,
-
-        // don't change layout if playPauseButton resizes with scaleFactorWhenPaused
-        resize: false
-      } );
-
-      const children = [];
-
-      // Optional Normal/Slow radio button group
-      let radioButtonGroup = null;
-      if ( options.isSlowMotionProperty ) {
-
-        const labelOptions = merge( {
-          font: new PhetFont( 14 )
-        }, options.labelOptions );
-
-        const normalText = new Text( speedNormalString, labelOptions );
-        const slowText = new Text( speedSlowString, labelOptions );
-
-        const radioButtonOptions = merge( {
-          xSpacing: 5,
-          radius: normalText.height / 2.2
-        }, options.radioButtonOptions );
-
-        const radioButtonGroupOptions = merge( {
-          radioButtonOptions: radioButtonOptions,
-          spacing: 9,
-          touchAreaDilation: 10,
-          maxWidth: 150,
-          tandem: options.tandem.createTandem( 'speedRadioButtonGroup' ),
-
-          // PDOM
-          labelTagName: 'h4',
-          labelContent: simSpeedsString
-        }, options.radioButtonGroupOptions );
-
-        radioButtonGroup = new VerticalAquaRadioButtonGroup( options.isSlowMotionProperty, [
-          { value: false, node: normalText, labelContent: speedNormalString, tandemName: 'normal' },
-          { value: true, node: slowText, labelContent: speedSlowString, tandemName: 'slow' }
-        ], radioButtonGroupOptions );
-
-        // PDOM - so that the RadioButtonGroup label is read any time a RadioButton gets focus
-        radioButtonGroup.addAriaLabelledbyAssociation( {
-          thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-          otherNode: radioButtonGroup,
-          otherElementName: AccessiblePeer.LABEL_SIBLING
-        } );
-
-        children.push( new HBox( {
-          spacing: options.buttonsXSpacing,
-          children: [ pushButtonGroup, radioButtonGroup ],
-
-          // don't change layout if PlayPauseButton size changes
-          resize: false
-        } ) );
-      }
-      else {
-        children.push( pushButtonGroup );
+        assert && assert( children.length === 2, 'layout assumes only PlayPauseButtons and SpeedRadioButtonGroup children' );
+        children[ 1 ].leftCenter = children[ 0 ].rightCenter.plusXY( options.buttonGroupXSpacing, 0 );
       }
 
       assert && assert( !options.children, 'TimeControlNode sets children' );
@@ -199,7 +135,7 @@ define( require => {
       super( options );
 
       // @private {PlayPauseButton} - for layout
-      this.playPauseButton = playPauseButton;
+      this.playPauseStepButtons = playPauseStepButtons;
 
       // PDOM - this node's primary sibling is aria-labelledby its own label so the label content is read whenever
       // a member of the group receives focus
@@ -225,11 +161,8 @@ define( require => {
 
       // @private
       this.disposeTimeControlNode = () => {
-
-        playPauseButton.dispose();
-        stepForwardButton.dispose();
-        stepBackwardButton && stepBackwardButton.dispose();
-        radioButtonGroup && radioButtonGroup.dispose();
+        playPauseStepButtons.dispose();
+        speedRadioButtonGroup && speedRadioButtonGroup.dispose();
 
         if ( ownsEnabledProperty ) {
           this.enabledProperty.dispose();
@@ -248,7 +181,7 @@ define( require => {
      * @returns {Vector2}
      */
     getPlayPauseButtonCenter() {
-      return this.playPauseButton.center;
+      return this.playPauseStepButtons.getPlayPauseButtonCenter();
     }
 
     /**
@@ -258,6 +191,194 @@ define( require => {
     dispose() {
       this.disposeTimeControlNode();
       super.dispose();
+    }
+  }
+
+  // Possible play speeds for TimeControlNode
+  // @public
+  // @static
+  TimeControlNode.TimeControlSpeeds = TimeControlSpeeds;
+
+  /**
+   * Inner type that collects the PlayPauseButton, StepForwardButton, and optionally the StepBackwardButton in
+   * horizontal layout.
+   */
+  class PlayPauseStepButtons extends HBox {
+
+    /**
+     * @param {BooleanProperty} isPlayingProperty
+     * @param {Tandem} tandem
+     * @param {Obectj} [options]
+     */
+    constructor( isPlayingProperty, tandem, options ) {
+
+      if ( options ) {
+        if ( options.playPauseButtonOptions ) {
+          assert && assert( !options.playPauseButtonOptions.tandem, 'TimeControlNode sets tandems for buttons' );
+          assert && assert( !options.playPauseButtonOptions.phetioDocumentation, 'TimeControlNode sets phetioDocumentation' );
+        }
+        if ( options.stepForwardButtonOptions ) {
+          assert && assert( !options.stepForwardButtonOptions.tandem, 'TimeControlNode sets tandems for buttons' );
+          assert && assert( !options.playPauseButtonOptions.phetioDocumentation, 'TimeControlNode sets phetioDocumentation' );
+        }
+        if ( options.stepBackwardButtonOptions ) {
+          assert && assert( !options.stepBackwardButtonOptions.tandem, 'TimeControlNode sets tandems for buttons' );
+          assert && assert( !options.stepBackwardButtonOptions.phetioDocumentation, 'TimeControlNode sets phetioDocumentations' );
+        }
+      }
+
+      // default options for step buttons
+      const stepButtonOptions = {
+        isPlayingProperty: isPlayingProperty,
+        radius: 15,
+        touchAreaDilation: 5
+      };
+
+      options = merge( {
+
+        // {boolean} - if true, a StepBackwardButton is included in the button group
+        includeStepBackwardButton: false,
+
+        // {number} horizontal space between Play/Pause and Step buttons
+        playPauseStepXSpacing: 10,
+
+        // Options for the PlayPauseButton
+        playPauseButtonOptions: {
+          radius: 20,
+          touchAreaDilation: 5,
+          tandem: tandem.createTandem( 'playPauseButton' ),
+          phetioDocumentation: 'Button to control the animation in the simulation. This will also stop the model from stepping.'
+        },
+
+        // Options for the StepBackwardButton
+        stepBackwardButtonOptions: merge( {
+          tandem: tandem.createTandem( 'stepForwardButton' ),
+          phetioDocumentation: 'Progress the simulation a single model step forwards.'
+        }, stepButtonOptions ),
+
+        // Options for the StepForwardButton
+        stepForwardButtonOptions: merge( {
+          phetioDocumentation: 'Progress the simulation a single model step backwards.',
+          tandem: tandem.createTandem( 'stepBackwardButton' )
+        }, stepButtonOptions )
+      }, options );
+
+      const playPauseButton = new PlayPauseButton( isPlayingProperty, options.playPauseButtonOptions );
+      const stepForwardButton = new StepForwardButton( options.stepForwardButtonOptions );
+
+      const buttons = [ playPauseButton, stepForwardButton ];
+
+      let stepBackwardButton = null;
+      if ( options.includeStepBackwardButton ) {
+        stepBackwardButton = new StepBackwardButton( options.stepBackwardButtonOptions );
+        buttons.unshift( stepBackwardButton );
+      }
+
+      // Play/Pause and Step buttons
+      super( {
+        spacing: options.playPauseStepXSpacing,
+        children: buttons,
+
+        // don't change layout if playPauseButton resizes with scaleFactorWhenPaused
+        resize: false
+      } );
+
+      // @private {PlayPauseButton} - for layout
+      this.playPauseButton = playPauseButton;
+
+      this.disposePlayPauseStepButtons = () => {
+        playPauseButton.dispose();
+        stepForwardButton.dispose();
+        stepBackwardButton && stepBackwardButton.dispose();
+      };
+    }
+
+    /**
+     * Get the center of the PlayPauseButton, in the local coordinate frame of the PlayPauseStepButtons.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getPlayPauseButtonCenter() {
+      return this.playPauseButton.center;
+    }
+
+    /**
+     * Garbage collection.
+     */
+    dispose() {
+      this.disposePlayPauseStepButtons();
+      super.dispose();
+    }
+  }
+
+  /**
+   * Inner type for speed radio buttons.
+   */
+  class SpeedRadioButtonGroup extends VerticalAquaRadioButtonGroup {
+
+    /**
+     * @param {EnumerationProperty.<TimeControlSpeeds>} timeControlSpeedProperty
+     * @param {TimeControlSpeeds[]} timeControlSpeeds - array of speeds to be included in this button group
+     * @param {Tandem} tandem
+     * @param {Object} [options]
+     */
+    constructor( timeControlSpeedProperty, timeControlSpeeds, tandem, options ) {
+      options = merge( {
+
+        // {Object} - options for the Normal/Slow text labels
+        labelOptions: {
+          font: new PhetFont( 14 )
+        },
+
+        // {Object|null} - options for the radio button group, defaults defined below because they are dependent on
+        // size of label text
+        radioButtonGroupOptions: null,
+
+        // {Object|null} - options for individual radio buttons, defaults below because they are dependent on size of label
+        // text
+        radioButtonOptions: null
+      }, options );
+
+      const radioButtons = [];
+      timeControlSpeeds.forEach( speed => {
+        const speedLabel = SPEED_LABEL_MAP.get( speed );
+        const labelNode = new Text( speedLabel.labelString, options.labelOptions );
+
+        radioButtons.push( {
+          value: speed,
+          node: labelNode,
+          labelContent:
+          speedLabel.labelString,
+          tandemName: SPEED_LABEL_MAP.get( speed ).tandemName
+        } );
+      } );
+
+      const radioButtonOptions = merge( {
+        xSpacing: 5,
+        radius: radioButtons[ 0 ].node.height / 2.2
+      }, options.radioButtonOptions );
+
+      const radioButtonGroupOptions = merge( {
+        radioButtonOptions: radioButtonOptions,
+        spacing: 9,
+        touchAreaDilation: 10,
+        maxWidth: 150,
+        tandem: tandem.createTandem( 'speedRadioButtonGroup' ),
+
+        // PDOM
+        labelTagName: 'h4',
+        labelContent: simSpeedsString
+      }, options.radioButtonGroupOptions );
+
+      super( timeControlSpeedProperty, radioButtons, radioButtonGroupOptions );
+
+      // PDOM - so that the RadioButtonGroup label is read any time a RadioButton gets focus
+      this.addAriaLabelledbyAssociation( {
+        thisElementName: AccessiblePeer.PRIMARY_SIBLING,
+        otherNode: this,
+        otherElementName: AccessiblePeer.LABEL_SIBLING
+      } );
     }
   }
 

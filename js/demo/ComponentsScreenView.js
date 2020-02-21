@@ -90,6 +90,7 @@ define( require => {
   const Tandem = require( 'TANDEM/Tandem' );
   const Text = require( 'SCENERY/nodes/Text' );
   const TextKeyNode = require( 'SCENERY_PHET/keyboard/TextKeyNode' );
+  const TimeControlNode = require( 'SCENERY_PHET/TimeControlNode' );
   const ThermometerNode = require( 'SCENERY_PHET/ThermometerNode' );
   const VBox = require( 'SCENERY/nodes/VBox' );
   const Vector2 = require( 'DOT/Vector2' );
@@ -146,6 +147,7 @@ define( require => {
       { label: 'StarNode', createNode: demoStarNode },
       { label: 'StopwatchNode', createNode: demoStopwatchNode },
       { label: 'ThermometerNode', createNode: demoTemperatureNode },
+      { label: 'TimeControlNode', createNode: demoTimeControlNode },
       { label: 'WireNode', createNode: demoWireNode }
     ], merge( {
       comboBoxItemFont: new PhetFont( 12 ),
@@ -1467,6 +1469,47 @@ define( require => {
         center: layoutBounds.center
       } );
     };
+  };
+
+  // creates a demo for the TimeControlNode
+  const demoTimeControlNode = function( layoutBounds ) {
+
+    const defaultTimeControlNode = new TimeControlNode( new BooleanProperty( true ) );
+
+    // a TimeControlNode with all push buttons
+    const pushButtonTimeControlNode = new TimeControlNode( new BooleanProperty( true ), {
+      playPauseStepButtonOptions: {
+        includeStepBackwardButton: true,
+        playPauseButtonOptions: {
+          scaleFactorWhenPaused: 1.3
+        }
+      }
+    } );
+
+    // a TimeControlNode with default speed radio buttons
+    const speedTimeControlNode =  new TimeControlNode( new BooleanProperty( true ), {
+      timeControlSpeedProperty: new Property( TimeControlNode.TimeControlSpeeds.NORMAL )
+    } );
+
+    // a TimeControlNode with swapped layout for radio buttons with radio buttons wrapped in a panel
+    const customTimeControlNode = new TimeControlNode( new BooleanProperty( true ), {
+      timeControlSpeedProperty: new Property( TimeControlNode.TimeControlSpeeds.SLOW ),
+      timeControlSpeeds: [ TimeControlNode.TimeControlSpeeds.NORMAL, TimeControlNode.TimeControlSpeeds.FAST, TimeControlNode.TimeControlSpeeds.SLOW ],
+      speedRadioButtonGroupOnLeft: true,
+      wrapSpeedButtonsInPanel: true,
+      speedRadioButtonGroupPanelOptions: {
+        fill: 'rgb(239,239,195)'
+      },
+      buttonGroupXSpacing: 100,
+      wrapSpeedRadioButtonGroupInPanel: true
+    } );
+
+    const controls = [ defaultTimeControlNode, pushButtonTimeControlNode, speedTimeControlNode, customTimeControlNode ];
+    return new VBox( {
+      children: controls,
+      spacing: 30,
+      center:  layoutBounds.center
+    } );
   };
 
   return inherit( DemosScreenView, ComponentsScreenView, {
