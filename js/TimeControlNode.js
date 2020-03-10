@@ -59,10 +59,13 @@ define( require => {
 
       options = merge( {
 
+        // REVIEW: Okay, this is a total nit, but the word wrapping on the comments below is very inconsistent.
+
         // {null|EnumerationProperty.<TimeControlSpeeds>} - Play speed Property for the
         // radio button group. If null, no radio buttons included in this control.
         timeControlSpeedProperty: null,
 
+        // REVIEW: Did you mean to say "Vertical radio buttons for *are created* for each..."?
         // {TimeControlSpeeds[]} - Speeds supported by this TimeControlNode. Vertical radio buttons for
         // each in the order provided.
         timeControlSpeeds: DEFAULT_TIME_CONTROL_SPEEDS,
@@ -103,6 +106,8 @@ define( require => {
         labelContent: timeControlLabelString,
         descriptionContent: timeControlDescriptionString
       }, options );
+
+      // REVIEW: Several lines below are substantially over the 120 char recommendation and are hard to read on my monitor.
 
       // options validation
       if ( options.timeControlSpeedProperty !== null ) {
@@ -228,6 +233,7 @@ define( require => {
       }
 
       // default options for step buttons
+      // REVIEW: How about naming them defaultStepButtonOptions?
       const stepButtonOptions = {
         isPlayingProperty: isPlayingProperty,
         radius: 15,
